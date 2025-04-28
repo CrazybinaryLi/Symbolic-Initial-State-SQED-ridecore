@@ -1,0 +1,3 @@
+*.btor2
+log*
+*.vcd

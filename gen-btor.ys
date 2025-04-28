@@ -1,0 +1,83 @@
+read_verilog -formal ./rtl/define.v \
+./rtl/topsim.v \
+./rtl/alloc_issue_ino.v \
+./rtl/search_be.v \
+./rtl/srcsel.v  \
+./rtl/alu_ops.vh \
+./rtl/arf.v \
+./rtl/ram_sync.v \
+./rtl/ram_sync_nolatch.v  \
+./rtl/brimm_gen.v \
+./rtl/constants.vh \
+./rtl/decoder.v \
+./rtl/dmem.v \
+./rtl/exunit_alu.v \
+./rtl/exunit_branch.v \
+./rtl/exunit_ldst.v \
+./rtl/exunit_mul.v \
+./rtl/imem.v \
+./rtl/imm_gen.v \
+./rtl/pipeline_if.v \
+./rtl/gshare.v \
+./rtl/pipeline.v \
+./rtl/oldest_finder.v \
+./rtl/btb.v \
+./rtl/prioenc.v \
+./rtl/mpft.v \
+./rtl/reorderbuf.v \
+./rtl/rrf_freelistmanager.v \
+./rtl/rrf.v \
+./rtl/rs_alu.v \
+./rtl/rs_branch.v \
+./rtl/rs_ldst.v \
+./rtl/rs_mul.v \
+./rtl/rs_reqgen.v \
+./rtl/rv32_opcodes.vh \
+./rtl/src_manager.v \
+./rtl/srcopr_manager.v \
+./rtl/storebuf.v \
+./rtl/tag_generator.v \
+./rtl/dualport_ram.v \
+./rtl/alu.v \
+./rtl/multiplier.v \
+./QEDFiles/inst_constraints.v \
+./QEDFiles/modify_instruction.v \
+./QEDFiles/qed_decoder.v \
+./QEDFiles/qed_i_cache.v \
+./QEDFiles/qed_instruction_mux.v \
+./QEDFiles/qed.v;
+
+# prep does a conservative elaboration
+# of the top module provided
+prep -top top;
+
+# this command just does a sanity check of the hierarchy
+hierarchy -check;
+
+# If an assumption is flopped, you might
+# see strange behavior at the last state
+# (because the clock hasn't toggled)
+# this command ensures that assumptions
+# hold at every state
+chformal -assume -early;
+
+# this processes memories
+# nomap means it will keep them as arrays
+memory;
+
+# flatten the design hierarchy
+flatten;
+
+# (optional) uncomment and set values to simulate reset signal
+# use -resetn for an active low pin
+# -n configures the number of cycles to simulate
+# -rstlen configures how long the reset is active (recommended to keep it active for the whole simulation)
+# -w tells it to write back the final state of the simulation as the initial state in the btor2 file
+# another useful option is -zinit which zero initializes any uninitialized state
+sim -clock clk -resetn reset_x -n 5 -rstlen 5 -zinit -w top;
+
+# This turns all undriven signals into inputs
+setundef -undriven -expose;
+
+# This writes to a file in BTOR2 format
+write_btor -s fsm.btor2
